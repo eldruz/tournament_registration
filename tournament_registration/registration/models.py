@@ -19,24 +19,23 @@ class Tournament(models.Model):
         (u'USF4', u'Ultra Street Fighter 4'),
         (u'3.3', u'Street Fighter III Third Strike'),
     )
-    title = models.CharField('Tournament title.',
-                             max_length=256,
-                             unique=True,
-                             blank=False)
-    game = models.CharField('Game played for this tournament.\n\
-                            The games are chosen from a hardcoded list.',
-                            max_length=256,
-                            choices=GAME_LIST,
-                            blank=False)
-    date = models.DateField('Date of the tournament', blank=False)
+    title   = models.CharField('Tournament title.',
+                               max_length=256,
+                               unique=True,
+                               blank=False)
+    game    = models.CharField('Game played for this tournament.\n\
+                               The games are chosen from a hardcoded list.',
+                               max_length=256,
+                               choices=GAME_LIST,
+                               blank=False)
+    date    = models.DateField('Date of the tournament', blank=False)
     support = models.CharField('Support on which the tournament will be played.',
                                max_length=256,
                                default=u'Unknown')
-    nb_max = models.PositiveSmallIntegerField('Maximum number of participants.', blank=False)
-    price = models.PositiveSmallIntegerField('Entry fee for the tournament', default=0)
-    nb_per_team = models.PositiveSmallIntegerField('Number of players per team.',
-                                                   default=1)
-    objects = models.Manager()
+    nb_max      = models.PositiveSmallIntegerField('Maximum number of participants.', blank=False)
+    price       = models.PositiveSmallIntegerField('Entry fee for the tournament', default=0)
+    nb_per_team = models.PositiveSmallIntegerField('Number of players per team.',  default=1)
+    objects   = models.Manager()
     utilities = TournamentManager()
 
     class Meta:

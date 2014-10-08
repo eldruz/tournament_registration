@@ -3,8 +3,8 @@ from datetime import date
 from django.test import TestCase
 from django.db import IntegrityError
 
-from .models import Tournament
-from .models import TournamentManager
+from registration.models import Tournament
+from registration.models import TournamentManager
 
 class TournamentTestCase(TestCase):
     def setUp(self):

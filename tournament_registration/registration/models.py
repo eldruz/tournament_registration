@@ -42,7 +42,6 @@ class Tournament(ValidateOnSaveMixin, models.Model):
     # Fields
     title   = models.CharField('Tournament title.',
                                max_length=256,
-                               unique=True,
                                blank=False)
     game    = models.CharField('Game played for this tournament.\n\
                                The games are chosen from a hardcoded list.',
@@ -73,9 +72,24 @@ class Tournament(ValidateOnSaveMixin, models.Model):
         return self.title
 
 
+class EntryManager(models.Manager):
+    def create_entry(self, tournament_title, tournament_date, player):
+        # Check if a tournament with the date and name provided matches
+        # an existing tournament. Otherwise, raise a DoesNotExist exception
+        tourney = Tournament.objects.get(title=tournament_title, date=tournament_date)
+        entry = Entry(tournament_title=tournament_title,
+                      tournament_date=tournament_date,
+                      player=player)
+        entry.save()
+        return entry
+
+
 class Entry(models.Model):
-    tournament_title = models.ForeignKey(Tournament, to_field='title')
-    player           = models.CharField(max_length=256)
+    tournament_title = models.CharField('Tournament title', max_length=256, blank=False)
+    tournament_date = models.DateField('Date of the tournament', blank=False)
+    player           = models.CharField(max_length=256, blank=False, null=False)
+    objects = models.Manager()
+    utilities = EntryManager()
 
     def __unicode__(self):
         return self.player + ' in ' + self.tournament_title.__unicode__()

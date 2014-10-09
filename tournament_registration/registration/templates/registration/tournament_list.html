@@ -1,0 +1,6 @@
+<h2>Tournaments</h2>
+    <ul>
+        {% for tournament in tournament_list %}
+        <li>{{ tournament.title }} - ID:{{ tournament.id }}</li>
+        {% endfor %}
+    </ul>

@@ -6,7 +6,6 @@ from django.core.exceptions import ValidationError
 from django.core.exceptions import ObjectDoesNotExist
 
 from registration.models import Tournament
-from registration.models import TournamentManager
 from registration.models import Entry
 
 class TournamentTestCase(TestCase):

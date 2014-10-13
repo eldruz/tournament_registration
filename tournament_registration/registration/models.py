@@ -20,7 +20,7 @@ class ValidateOnSaveMixin(object):
 
 class TournamentManager(models.Manager):
     def create_tournament(self, title, game, date, nb_max, **kwargs):
-        additional_attributes = {'support', 'price', 'nb_per_team'}
+        additional_attributes = {'id', 'support', 'price', 'nb_per_team'}
         tourney = Tournament(title=title,
                              game=game,
                              date=date,
@@ -74,12 +74,8 @@ class Tournament(ValidateOnSaveMixin, models.Model):
 
 
 class EntryManager(models.Manager):
-    def create_entry(self, tournament_title, tournament_date, player):
-        # Check if a tournament with the date and name provided matches
-        # an existing tournament. Otherwise, raise a DoesNotExist exception
-        tourney = Tournament.objects.get(title=tournament_title, date=tournament_date)
-        entry   = Entry(tournament_title=tournament_title,
-                        tournament_date=tournament_date,
+    def create_entry(self, tournament_id, player):
+        entry   = Entry(tournament_id=tournament_id,
                         player=player)
         entry.save()
         return entry

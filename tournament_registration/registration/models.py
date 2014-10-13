@@ -83,8 +83,13 @@ class EntryManager(models.Manager):
         entry.save()
         return entry
 
-    def get_player_list(self, tournament_id):
+    def get_player_tournament_list(self, tournament_id):
         return Entry.objects.filter(tournament_id=tournament_id).only('player')
+
+
+class EntryPlayersManager(models.Manager):
+    def get_queryset(self):
+        return Entry.objects.only('player')
 
 
 class Entry(models.Model):
@@ -94,6 +99,7 @@ class Entry(models.Model):
     player           = models.CharField(max_length=256, blank=False, null=False)
     objects = models.Manager()
     utilities = EntryManager()
+    player_list = EntryPlayersManager()
 
     def __unicode__(self):
         return self.player + ' in ' + self.tournament_id.__unicode__()

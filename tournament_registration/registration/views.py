@@ -16,7 +16,14 @@ class TournamentDetail(DetailView):
 
 class PlayerList(ListView):
     model = Entry
+    queryset = Entry.player_list.all()
     template_name = 'registration/player_list.html'
+    context_object_name = 'player_list'
+
+
+class PlayerTournamentList(ListView):
+    model = Entry
+    template_name = 'registration/player_tournament_list.html'
     context_object_name = 'player_list'
 
     def get_queryset(self):
@@ -24,11 +31,11 @@ class PlayerList(ListView):
         tourney = Tournament.objects.get(id=self.kwargs['tournament_id'])
         self.tournament_name = tourney.title
         self.tournament_date = tourney.date
-        return Entry.utilities.get_player_list(self.kwargs['tournament_id'])
+        return Entry.utilities.get_player_tournament_list(self.kwargs['tournament_id'])
 
     def get_context_data(self, **kwargs):
         # Call the base implementation first to get a context
-        context = super(PlayerList, self).get_context_data(**kwargs)
+        context = super(PlayerTournamentList, self).get_context_data(**kwargs)
         # Add in the tournament name and date
         context['tournament_name'] = self.tournament_name
         context['tournament_date'] = self.tournament_date

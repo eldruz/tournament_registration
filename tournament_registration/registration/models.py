@@ -1,5 +1,6 @@
 from django.db import models
 from django.core.exceptions import ValidationError
+from django.http import Http404
 
 
 class ValidateOnSaveMixin(object):
@@ -77,29 +78,37 @@ class EntryManager(models.Manager):
         # Check if a tournament with the date and name provided matches
         # an existing tournament. Otherwise, raise a DoesNotExist exception
         tourney = Tournament.objects.get(title=tournament_title, date=tournament_date)
-        entry = Entry(tournament_title=tournament_title,
-                      tournament_date=tournament_date,
-                      player=player)
+        entry   = Entry(tournament_title=tournament_title,
+                        tournament_date=tournament_date,
+                        player=player)
         entry.save()
         return entry
 
-    def get_player_tournament_list(self, tournament_id):
-        return Entry.objects.filter(tournament_id=tournament_id).only('player')
-
 
 class EntryPlayersManager(models.Manager):
-    def get_queryset(self):
-        return Entry.objects.only('player')
+    def get_player_list(self):
+        player_list = Entry.objects.only('player')
+        return player_list
+
+    def get_players_per_tournament(self, tournament_id):
+        player_list = Entry.objects.filter(tournament_id=tournament_id).only('player')
+        if not player_list:
+            raise Http404
+        return player_list
+
+    def get_tournaments_per_player(self, player_name):
+        tournaments_list = Entry.objects.select_related('tournament_id').filter(player=player_name)
+        if not tournaments_list:
+            raise Http404
+        return tournaments_list
 
 
 class Entry(models.Model):
     tournament_id = models.ForeignKey('Tournament')
-    # tournament_title = models.CharField('Tournament title', max_length=256, blank=False)
-    # tournament_date = models.DateField('Date of the tournament', blank=False)
-    player           = models.CharField(max_length=256, blank=False, null=False)
-    objects = models.Manager()
-    utilities = EntryManager()
-    player_list = EntryPlayersManager()
+    player        = models.CharField(max_length=256, blank=False, null=False)
+    objects       = models.Manager()
+    utilities     = EntryManager()
+    players       = EntryPlayersManager()
 
     def __unicode__(self):
         return self.player + ' in ' + self.tournament_id.__unicode__()

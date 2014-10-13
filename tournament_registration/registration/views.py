@@ -16,27 +16,44 @@ class TournamentDetail(DetailView):
 
 class PlayerList(ListView):
     model = Entry
-    queryset = Entry.player_list.all()
+    queryset = Entry.players.get_player_list()
     template_name = 'registration/player_list.html'
     context_object_name = 'player_list'
 
 
-class PlayerTournamentList(ListView):
+class PlayersPerTournamentList(ListView):
     model = Entry
     template_name = 'registration/player_tournament_list.html'
     context_object_name = 'player_list'
 
     def get_queryset(self):
         """Returns only the names of the player for the tournament"""
+        entry = Entry.players.get_players_per_tournament(self.kwargs['tournament_id'])
         tourney = Tournament.objects.get(id=self.kwargs['tournament_id'])
         self.tournament_name = tourney.title
         self.tournament_date = tourney.date
-        return Entry.utilities.get_player_tournament_list(self.kwargs['tournament_id'])
+        return entry
 
     def get_context_data(self, **kwargs):
-        # Call the base implementation first to get a context
-        context = super(PlayerTournamentList, self).get_context_data(**kwargs)
+        context = super(PlayersPerTournamentList, self).get_context_data(**kwargs)
         # Add in the tournament name and date
         context['tournament_name'] = self.tournament_name
         context['tournament_date'] = self.tournament_date
+        return context
+
+
+class TournamentsPerPlayerList(ListView):
+    model = Entry
+    template_name = 'registration/player_detail.html'
+    context_object_name = 'player'
+
+    def get_queryset(self):
+        """Returns the tournament the specified player is registered in."""
+        entry = Entry.players.get_tournaments_per_player(self.kwargs['player_name'])
+        self.player_name = self.kwargs['player_name']
+        return entry
+
+    def get_context_data(self, **kwargs):
+        context = super(TournamentsPerPlayerList, self).get_context_data(**kwargs)
+        context['player_name'] = self.player_name
         return context

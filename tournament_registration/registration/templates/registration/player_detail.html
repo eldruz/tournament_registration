@@ -1,0 +1,6 @@
+<h2> {{ player_name }} </h2>
+    <ul>
+        {% for entry in player %}
+        <li>{{ entry.tournament_id }}</li>
+        {% endfor %}
+    </ul>

@@ -4,6 +4,7 @@ from django.test import TestCase
 from django.db import IntegrityError
 from django.core.exceptions import ValidationError
 from django.core.exceptions import ObjectDoesNotExist
+from django.http import Http404
 
 from registration.models import Tournament
 from registration.models import Entry
@@ -64,4 +65,11 @@ class EntryTestCase(TestCase):
         self.assertEqual(entry.tournament_id.date, date.today())
         self.assertEqual(entry.player, 'Komoda')
 
-
+    def test_queries_404(self):
+        """Queries of players or tournaments in custom manager functions"""
+        self.assertRaises(Http404,
+                          Entry.players.get_players_per_tournament,
+                          tournament_id=12)
+        self.assertRaises(Http404,
+                          Entry.players.get_tournaments_per_player,
+                          player_name='Davigo35')

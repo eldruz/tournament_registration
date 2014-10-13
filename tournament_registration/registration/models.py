@@ -75,8 +75,8 @@ class Tournament(ValidateOnSaveMixin, models.Model):
 
 class EntryManager(models.Manager):
     def create_entry(self, tournament_id, player):
-        entry   = Entry(tournament_id=tournament_id,
-                        player=player)
+        entry = Entry(tournament_id=tournament_id,
+                      player=player)
         entry.save()
         return entry
 

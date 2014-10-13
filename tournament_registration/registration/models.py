@@ -83,13 +83,17 @@ class EntryManager(models.Manager):
         entry.save()
         return entry
 
+    def get_player_list(self, tournament_id):
+        return Entry.objects.filter(tournament_id=tournament_id).only('player')
+
 
 class Entry(models.Model):
-    tournament_title = models.CharField('Tournament title', max_length=256, blank=False)
-    tournament_date = models.DateField('Date of the tournament', blank=False)
+    tournament_id = models.ForeignKey('Tournament')
+    # tournament_title = models.CharField('Tournament title', max_length=256, blank=False)
+    # tournament_date = models.DateField('Date of the tournament', blank=False)
     player           = models.CharField(max_length=256, blank=False, null=False)
     objects = models.Manager()
     utilities = EntryManager()
 
     def __unicode__(self):
-        return self.player + ' in ' + self.tournament_title.__unicode__()
+        return self.player + ' in ' + self.tournament_id.__unicode__()

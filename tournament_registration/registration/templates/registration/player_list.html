@@ -1,0 +1,7 @@
+<h2> {{ tournament_name }} </h2>
+<h3> {{ tournament_date }} </h3>
+    <ul>
+        {% for player in player_list %}
+        <li>{{ player.player }}</li>
+        {% endfor %}
+    </ul>

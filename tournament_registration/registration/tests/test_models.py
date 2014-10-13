@@ -13,7 +13,8 @@ class TournamentTestCase(TestCase):
         Tournament.utilities.create_tournament(title='Tournoi test',
                                                game='2X',
                                                date=date.today(),
-                                               nb_max=64)
+                                               nb_max=64,
+                                               id=5)
 
     def test_utilities_creation(self):
         """Tournament created with the utility creation funtion is correct"""
@@ -25,6 +26,7 @@ class TournamentTestCase(TestCase):
         self.assertEqual(tourney.support, u'Unknown')
         self.assertEqual(tourney.nb_per_team, 1)
         self.assertEqual(tourney.price, 0)
+        self.assertEqual(tourney.id, 5)
 
     def test_cannot_create_duplicate(self):
         """Only one (title, date) couple can exist in the database"""
@@ -47,29 +49,19 @@ class TournamentTestCase(TestCase):
 
 class EntryTestCase(TestCase):
     def setUp(self):
-        Tournament.utilities.create_tournament(title='X-MANIA',
-                                               game='2X',
-                                               date=date.today(),
-                                               nb_max=64)
-        Entry.utilities.create_entry(tournament_title='X-MANIA',
-                                     tournament_date=date.today(),
+        tourney = Tournament.utilities.create_tournament(title='X-MANIA',
+                                                         game='2X',
+                                                         date=date.today(),
+                                                         nb_max=64,
+                                                         id=100)
+        Entry.utilities.create_entry(tournament_id=tourney,
                                      player='Komoda')
 
     def test_valid_entry_creation(self):
         """Entry created with the utility function is correct"""
-        entry = Entry.utilities.get(player='Komoda')
-        self.assertEqual(entry.tournament_title, 'X-MANIA')
-        self.assertEqual(entry.tournament_date, date.today())
+        entry = Entry.utilities.select_related('tournament_id').get(tournament_id=100)
+        self.assertEqual(entry.tournament_id.title, 'X-MANIA')
+        self.assertEqual(entry.tournament_id.date, date.today())
+        self.assertEqual(entry.player, 'Komoda')
 
-    def test_foreign_key_constraint(self):
-        """An entry has to reference an existing tournament"""
-        self.assertRaises(ObjectDoesNotExist,
-                          Entry.utilities.create_entry,
-                          tournament_title='STUNFEST',
-                          tournament_date=date.today(),
-                          player='Zoulolz')
-        self.assertRaises(ObjectDoesNotExist,
-                          Entry.utilities.create_entry,
-                          tournament_title='X-MANIA',
-                          tournament_date=date(2012, 12, 12),
-                          player='Waldoze')
+

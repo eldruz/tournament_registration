@@ -1,10 +1,18 @@
 from django.shortcuts import render
+from django.core.urlresolvers import reverse_lazy
+from django.http import HttpResponseRedirect
+
 from django.views.generic import ListView
 from django.views.generic import DetailView
+from django.views.generic.edit import CreateView
+from django.views.generic.edit import UpdateView
+from django.views.generic.edit import DeleteView
 
 from .models import Tournament
 from .models import Entry
+from .models import Player
 
+# Display Views
 
 class TournamentList(ListView):
     model = Tournament
@@ -15,10 +23,7 @@ class TournamentDetail(DetailView):
 
 
 class PlayerList(ListView):
-    model = Entry
-    queryset = Entry.players.get_player_list()
-    template_name = 'registration/player_list.html'
-    context_object_name = 'player_list'
+    model = Player
 
 
 class PlayersPerTournamentList(ListView):
@@ -57,3 +62,43 @@ class TournamentsPerPlayerList(ListView):
         context = super(TournamentsPerPlayerList, self).get_context_data(**kwargs)
         context['player_name'] = self.player_name
         return context
+
+
+# Edit views
+
+class TournamentCreate(CreateView):
+    model = Tournament
+    fields = ['title', 'game', 'date', 'support', 'nb_max', 'price', 'nb_per_team']
+    template_name = 'registration/create_tournament.html'
+
+
+class TournamentUpdate(UpdateView):
+    model = Tournament
+    fields = ['title', 'game', 'date', 'support', 'nb_max', 'price', 'nb_per_team']
+    template_name = 'registration/create_tournament.html'
+
+
+class TournamentDelete(DeleteView):
+    model = Tournament
+    success_url = reverse_lazy('tournament_list')
+    template_name = 'registration/delete_tournament.html'
+
+
+class EntryCreateView(CreateView):
+    model = Entry
+    fields = ['tournament_id', 'player']
+    template_name = 'registration/create_tournament.html'
+
+
+class PlayerCreate(CreateView):
+    model = Player
+    fields = ['name', 'team', 'registered_tournaments']
+    template_name = 'registration/create_tournament.html'
+
+    def form_valid(self, form):
+        player = form.save(commit=False)
+        player.save()
+        for tournament in form.cleaned_data.get('registered_tournaments'):
+            entry = Entry(player=player, tournament_id=tournament)
+            entry.save()
+        return HttpResponseRedirect(self.get_success_url())

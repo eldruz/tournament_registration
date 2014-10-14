@@ -1,4 +1,6 @@
 from django.db import models
+from django.core.urlresolvers import reverse
+
 from django.core.exceptions import ValidationError
 from django.http import Http404
 
@@ -53,7 +55,7 @@ class Tournament(ValidateOnSaveMixin, models.Model):
     support = models.CharField('Support on which the tournament will be played.',
                                max_length=256,
                                default=u'Unknown')
-    nb_max      = models.PositiveSmallIntegerField('Maximum number of participants.', blank=False)
+    nb_max      = models.PositiveSmallIntegerField('Maximum number of participants.', blank=False, default=32)
     price       = models.PositiveSmallIntegerField('Entry fee for the tournament', default=0)
     nb_per_team = models.PositiveSmallIntegerField('Number of players per team.',  default=1)
     objects   = models.Manager()
@@ -71,6 +73,26 @@ class Tournament(ValidateOnSaveMixin, models.Model):
 
     def __unicode__(self):
         return self.title
+
+    def get_absolute_url(self):
+        return reverse('tournament_detail', kwargs={'pk': self.pk})
+
+
+class Player(models.Model):
+    name = models.CharField('Nickname of the player',
+                            max_length=256,
+                            primary_key=True)
+    team = models.CharField('Name of her team',
+                            max_length=128,
+                            blank=True)
+    registered_tournaments = models.ManyToManyField('Tournament',
+                                                    through='Entry')
+
+    class Meta:
+        unique_together = (('name', 'team'))
+
+    def __unicode__(self):
+        return '[' + self.team + '] ' + self.name
 
 
 class EntryManager(models.Manager):
@@ -101,10 +123,10 @@ class EntryPlayersManager(models.Manager):
 
 class Entry(models.Model):
     tournament_id = models.ForeignKey('Tournament')
-    player        = models.CharField(max_length=256, blank=False, null=False)
+    player        = models.ForeignKey('Player')
     objects       = models.Manager()
     utilities     = EntryManager()
     players       = EntryPlayersManager()
 
     def __unicode__(self):
-        return self.player + ' in ' + self.tournament_id.__unicode__()
+        return self.player.__unicode__() + ' in ' + self.tournament_id.__unicode__()

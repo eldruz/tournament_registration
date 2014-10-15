@@ -33,14 +33,16 @@ class PlayersPerTournamentList(ListView):
 
     def get_queryset(self):
         """Returns only the names of the player for the tournament"""
-        entry = Entry.players.get_players_per_tournament(self.kwargs['tournament_id'])
+        entry = Entry.players.\
+            get_players_per_tournament(self.kwargs['tournament_id'])
         tourney = Tournament.objects.get(id=self.kwargs['tournament_id'])
         self.tournament_name = tourney.title
         self.tournament_date = tourney.date
         return entry
 
     def get_context_data(self, **kwargs):
-        context = super(PlayersPerTournamentList, self).get_context_data(**kwargs)
+        context = super(PlayersPerTournamentList, self).\
+            get_context_data(**kwargs)
         # Add in the tournament name and date
         context['tournament_name'] = self.tournament_name
         context['tournament_date'] = self.tournament_date
@@ -54,12 +56,14 @@ class TournamentsPerPlayerList(ListView):
 
     def get_queryset(self):
         """Returns the tournament the specified player is registered in."""
-        entry = Entry.players.get_tournaments_per_player(self.kwargs['player_name'])
+        entry = Entry.players.\
+            get_tournaments_per_player(self.kwargs['player_name'])
         self.player_name = self.kwargs['player_name']
         return entry
 
     def get_context_data(self, **kwargs):
-        context = super(TournamentsPerPlayerList, self).get_context_data(**kwargs)
+        context = super(TournamentsPerPlayerList, self).\
+            get_context_data(**kwargs)
         context['player_name'] = self.player_name
         return context
 
@@ -68,13 +72,15 @@ class TournamentsPerPlayerList(ListView):
 
 class TournamentCreate(CreateView):
     model = Tournament
-    fields = ['title', 'game', 'date', 'support', 'nb_max', 'price', 'nb_per_team']
+    fields = ['title', 'game', 'date', 'support',\
+              'nb_max', 'price', 'nb_per_team']
     template_name = 'registration/create_tournament.html'
 
 
 class TournamentUpdate(UpdateView):
     model = Tournament
-    fields = ['title', 'game', 'date', 'support', 'nb_max', 'price', 'nb_per_team']
+    fields = ['title', 'game', 'date', 'support',\
+              'nb_max', 'price', 'nb_per_team']
     template_name = 'registration/create_tournament.html'
 
 
@@ -99,6 +105,5 @@ class PlayerCreate(CreateView):
         player = form.save(commit=False)
         player.save()
         for tournament in form.cleaned_data.get('registered_tournaments'):
-            entry = Entry(player=player, tournament_id=tournament)
-            entry.save()
+            Entry.utilities.create_entry(tournament, player)
         return HttpResponseRedirect(self.get_success_url())

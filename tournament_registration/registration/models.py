@@ -160,11 +160,33 @@ class EntryUtilitiesManager(models.Manager):
     have to use.
 
     """
-    def create_entry(self, tournament_id, player):
-        entry = Entry(tournament_id=tournament_id,
-                      player=player)
-        entry.save()
-        return entry
+    def create_entry(self, tournament, player):
+        """A function that adds an entry according to a set of constraints.
+
+        First of all, we cannot add an entry to a full tournament, that is
+        we cannot have more entries than the maximum number of attendees
+        specified in the tournament specs.
+
+        """
+        if self.is_tournament_full(tournament):
+            msg = 'The tournament is full.'
+            raise ValidationError(msg)
+        else:
+            entry = Entry(tournament_id=tournament,
+                          player=player)
+            entry.save()
+            return entry
+
+    def is_tournament_full(self, tournament):
+        # We get the number of registered players in the tournaments
+        nb_registered = Entry.players.get_players_per_tournament(tournament.id).count()
+        # Maximum number of attendees
+        nb_max = tournament.nb_max
+
+        if nb_registered < nb_max:
+            return False
+        else:
+            return True
 
 
 class EntryPlayersManager(models.Manager):
@@ -172,14 +194,14 @@ class EntryPlayersManager(models.Manager):
 
     """
     def get_players_per_tournament(self, tournament_id):
+        tourney = Tournament.objects.get(pk=tournament_id)
         player_list = Entry.objects.\
             filter(tournament_id=tournament_id).\
             only('player')
-        if not player_list:
-            raise Http404
         return player_list
 
     def get_tournaments_per_player(self, player_name):
+        player = Player.objects.get(pk=player_name)
         tournaments_list = Entry.objects.\
             select_related('tournament_id').\
             filter(player=player_name)

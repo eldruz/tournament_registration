@@ -25,6 +25,9 @@ class TournamentDetail(DetailView):
 class PlayerList(ListView):
     model = Player
 
+class PlayerDetail(DetailView):
+    model = Player
+
 
 class PlayersPerTournamentList(ListView):
     model = Entry
@@ -33,7 +36,7 @@ class PlayersPerTournamentList(ListView):
 
     def get_queryset(self):
         """Returns only the names of the player for the tournament"""
-        entry = Entry.players.\
+        entry = Entry.utilities.\
             get_players_per_tournament(self.kwargs['tournament_id'])
         tourney = Tournament.objects.get(id=self.kwargs['tournament_id'])
         self.tournament_name = tourney.title
@@ -46,25 +49,6 @@ class PlayersPerTournamentList(ListView):
         # Add in the tournament name and date
         context['tournament_name'] = self.tournament_name
         context['tournament_date'] = self.tournament_date
-        return context
-
-
-class TournamentsPerPlayerList(ListView):
-    model = Entry
-    template_name = 'registration/player_detail.html'
-    context_object_name = 'player'
-
-    def get_queryset(self):
-        """Returns the tournament the specified player is registered in."""
-        entry = Entry.players.\
-            get_tournaments_per_player(self.kwargs['player_name'])
-        self.player_name = self.kwargs['player_name']
-        return entry
-
-    def get_context_data(self, **kwargs):
-        context = super(TournamentsPerPlayerList, self).\
-            get_context_data(**kwargs)
-        context['player_name'] = self.player_name
         return context
 
 
@@ -107,3 +91,11 @@ class PlayerCreate(CreateView):
         for tournament in form.cleaned_data.get('registered_tournaments'):
             Entry.utilities.create_entry(tournament, player)
         return HttpResponseRedirect(self.get_success_url())
+
+class PlayerUpdate(UpdateView):
+    model = Player
+    fields = ['name', 'team', 'registered_tournaments']
+    template_name = 'registration/create_tournament.html'
+
+    # def form_valid(self, form):
+    #     return HttpResponseRedirect(self.get_success_url())

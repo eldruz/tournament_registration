@@ -152,6 +152,9 @@ class Player(models.Model):
     def __unicode__(self):
         return '[' + self.team + '] ' + self.name
 
+    def get_absolute_url(self):
+        return reverse('player_detail', kwargs={'pk': self.pk})
+
 
 class EntryUtilitiesManager(models.Manager):
     """Manager for creating and updating entries in tournaments.
@@ -179,7 +182,9 @@ class EntryUtilitiesManager(models.Manager):
 
     def is_tournament_full(self, tournament):
         # We get the number of registered players in the tournaments
-        nb_registered = Entry.players.get_players_per_tournament(tournament.id).count()
+        nb_registered = Entry.utilities.\
+            get_players_per_tournament(tournament.id).\
+            count()
         # Maximum number of attendees
         nb_max = tournament.nb_max
 
@@ -188,26 +193,12 @@ class EntryUtilitiesManager(models.Manager):
         else:
             return True
 
-
-class EntryPlayersManager(models.Manager):
-    """Manager with helper functions to get specific subsets of entries
-
-    """
     def get_players_per_tournament(self, tournament_id):
         tourney = Tournament.objects.get(pk=tournament_id)
         player_list = Entry.objects.\
             filter(tournament_id=tournament_id).\
             only('player')
         return player_list
-
-    def get_tournaments_per_player(self, player_name):
-        player = Player.objects.get(pk=player_name)
-        tournaments_list = Entry.objects.\
-            select_related('tournament_id').\
-            filter(player=player_name)
-        if not tournaments_list:
-            raise Http404
-        return tournaments_list
 
 
 class Entry(models.Model):
@@ -218,14 +209,15 @@ class Entry(models.Model):
         player: The foreign key to the Player model
         objects: The default Manager for django to use
         utilities: The utility manager used to create or update entries
-        players: The helper manager used to query specific sets in the model
 
     """
     tournament_id = models.ForeignKey('Tournament')
     player        = models.ForeignKey('Player')
     objects       = models.Manager()
     utilities     = EntryUtilitiesManager()
-    players       = EntryPlayersManager()
+
+    class Meta:
+        unique_together = (('tournament_id', 'player'))
 
     def __unicode__(self):
         return self.player.__unicode__()\

@@ -60,24 +60,37 @@ class EntryTestCase(TestCase):
 
     def test_valid_entry_creation(self):
         """Entry created with the utility function is correct"""
-        # Valid creation
         tournament = Tournament.objects.get(pk=100)
         player = Player.objects.get(pk='Komoda')
-        entry = Entry.objects.select_related('tournament_id').get(tournament_id=100, player='Komoda')
+        entry = Entry.objects.select_related('tournament_id').\
+            get(tournament_id=100, player='Komoda')
         self.assertEqual(tournament, entry.tournament_id)
         self.assertEqual(player, entry.player)
-        # Trying to create an entry when there is no more room
+
+    def test_maximum_number_of_players_registered(self):
+        tournament = Tournament.objects.get(pk=100)
         straw_player = Player.utilities.create_player(name='Boulbin')
         self.assertRaises(ValidationError,
                           Entry.utilities.create_entry,
                           tournament=tournament,
                           player=straw_player)
 
+    def test_cannot_enter_same_player_twice(self):
+        tourney = Tournament.utilities.create_tournament(title='Tougeki',
+                                                         game='2X',
+                                                         date=date.today(),
+                                                         nb_max=2,
+                                                         id=8)
+        player = Player.utilities.create_player(name='Yamsha', team='Escroc')
+        Entry.utilities.create_entry(tournament=tourney,
+                                     player=player)
+        self.assertRaises(IntegrityError,
+                          Entry.utilities.create_entry,
+                          tournament=tourney,
+                          player=player)
+
     def test_queries_404(self):
         """Queries of players or tournaments in custom manager functions"""
         self.assertRaises(ObjectDoesNotExist,
-                          Entry.players.get_players_per_tournament,
+                          Entry.utilities.get_players_per_tournament,
                           tournament_id=12)
-        self.assertRaises(ObjectDoesNotExist,
-                          Entry.players.get_tournaments_per_player,
-                          player_name='Davigo35')

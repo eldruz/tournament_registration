@@ -6,8 +6,7 @@ from django.core.exceptions import ValidationError
 from django.core.exceptions import ObjectDoesNotExist
 from django.http import Http404
 
-from registration.models import Tournament
-from registration.models import Entry
+from registration.models import Tournament, Entry, Player
 
 class TournamentTestCase(TestCase):
     def setUp(self):
@@ -55,15 +54,16 @@ class EntryTestCase(TestCase):
                                                          date=date.today(),
                                                          nb_max=64,
                                                          id=100)
+        player = Player.utilities.create_player(name='Komoda')
         Entry.utilities.create_entry(tournament_id=tourney,
-                                     player='Komoda')
+                                     player=player)
 
     def test_valid_entry_creation(self):
         """Entry created with the utility function is correct"""
         entry = Entry.utilities.select_related('tournament_id').get(tournament_id=100)
         self.assertEqual(entry.tournament_id.title, 'X-MANIA')
         self.assertEqual(entry.tournament_id.date, date.today())
-        self.assertEqual(entry.player, 'Komoda')
+        self.assertEqual(entry.player.name, 'Komoda')
 
     def test_queries_404(self):
         """Queries of players or tournaments in custom manager functions"""

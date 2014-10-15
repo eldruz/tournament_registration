@@ -104,6 +104,23 @@ class Tournament(ValidateOnSaveMixin, models.Model):
         return reverse('tournament_detail', kwargs={'pk': self.pk})
 
 
+class PlayerUtilitiesManager(models.Manager):
+    """Manager for creating and updating players in tournaments.
+
+    Everytime a view needs to create a player, this is the function they
+    have to use.
+
+    """
+    def create_player(self, name, **kwargs):
+        additional_attributes = {'team', 'registered_tournaments'}
+        player = Player(name=name)
+        for attribute, value in kwargs.items():
+            assert attribute in additional_attributes
+            setattr(player, attribute, value)
+        player.save()
+        return player
+
+
 class Player(models.Model):
     """The Player model.
 
@@ -126,6 +143,8 @@ class Player(models.Model):
                             blank=True)
     registered_tournaments = models.ManyToManyField('Tournament',
                                                     through='Entry')
+    objects = models.Manager()
+    utilities = PlayerUtilitiesManager()
 
     class Meta:
         unique_together = (('name', 'team'))

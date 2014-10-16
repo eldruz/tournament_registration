@@ -76,6 +76,7 @@ class EntryTestCase(TestCase):
                           player=straw_player)
 
     def test_cannot_enter_same_player_twice(self):
+        " Entering the same player twice does not create two players. "
         tourney = Tournament.utilities.create_tournament(title='Tougeki',
                                                          game='2X',
                                                          date=date.today(),
@@ -84,10 +85,10 @@ class EntryTestCase(TestCase):
         player = Player.utilities.create_player(name='Yamsha', team='Escroc')
         Entry.utilities.create_entry(tournament=tourney,
                                      player=player)
-        self.assertRaises(IntegrityError,
-                          Entry.utilities.create_entry,
-                          tournament=tourney,
-                          player=player)
+        Entry.utilities.create_entry(tournament=tourney,
+                                     player=player)
+        self.assertEqual(Entry.objects.filter(tournament_id=8).count(),
+                         1)
 
     def test_queries_404(self):
         """Queries of players or tournaments in custom manager functions"""

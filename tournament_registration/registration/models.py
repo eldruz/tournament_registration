@@ -2,6 +2,7 @@ from django.db import models
 from django.core.urlresolvers import reverse
 
 from django.core.exceptions import ValidationError
+from django.core.exceptions import ObjectDoesNotExist
 from django.http import Http404
 
 
@@ -171,14 +172,19 @@ class EntryUtilitiesManager(models.Manager):
         specified in the tournament specs.
 
         """
-        if self.is_tournament_full(tournament):
-            msg = 'The tournament is full.'
-            raise ValidationError(msg)
-        else:
-            entry = Entry(tournament_id=tournament,
-                          player=player)
-            entry.save()
-            return entry
+        try:
+            already_registered = Entry.objects.get(tournament_id=tournament,
+                                                   player=player)
+            return already_registered
+        except ObjectDoesNotExist:
+            if self.is_tournament_full(tournament):
+                msg = 'The tournament is full.'
+                raise ValidationError(msg)
+            else:
+                entry = Entry(tournament_id=tournament,
+                            player=player)
+                entry.save()
+                return entry
 
     def is_tournament_full(self, tournament):
         # We get the number of registered players in the tournaments

@@ -113,7 +113,7 @@ class PlayerUtilitiesManager(models.Manager):
 
     """
     def create_player(self, name, **kwargs):
-        additional_attributes = {'team', 'registered_tournaments'}
+        additional_attributes = {'id', 'team', 'registered_tournaments'}
         player = Player(name=name)
         for attribute, value in kwargs.items():
             assert attribute in additional_attributes
@@ -138,7 +138,7 @@ class Player(models.Model):
     """
     name = models.CharField('Nickname of the player',
                             max_length=256,
-                            primary_key=True)
+                            blank=False)
     team = models.CharField('Name of her team',
                             max_length=128,
                             blank=True)

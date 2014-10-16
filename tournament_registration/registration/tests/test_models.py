@@ -61,7 +61,7 @@ class EntryTestCase(TestCase):
     def test_valid_entry_creation(self):
         """Entry created with the utility function is correct"""
         tournament = Tournament.objects.get(pk=100)
-        player = Player.objects.get(pk='Komoda')
+        player = Player.objects.get(name='Komoda')
         entry = Entry.objects.select_related('tournament_id').\
             get(tournament_id=100, player='Komoda')
         self.assertEqual(tournament, entry.tournament_id)

@@ -1,5 +1,6 @@
 from django.shortcuts import render
 from django.core.urlresolvers import reverse_lazy
+from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect
 
 from django.views.generic import ListView
@@ -11,6 +12,7 @@ from django.views.generic.edit import DeleteView
 from .models import Tournament
 from .models import Entry
 from .models import Player
+from .forms import PlayerForm
 
 # Display Views
 
@@ -82,7 +84,7 @@ class EntryCreateView(CreateView):
 
 class PlayerCreate(CreateView):
     model = Player
-    fields = ['name', 'team', 'registered_tournaments']
+    form_class = PlayerForm
     template_name = 'registration/create_tournament.html'
 
     def form_valid(self, form):
@@ -90,7 +92,8 @@ class PlayerCreate(CreateView):
         player.save()
         for tournament in form.cleaned_data.get('registered_tournaments'):
             Entry.utilities.create_entry(tournament, player)
-        return HttpResponseRedirect(self.get_success_url())
+        return HttpResponseRedirect(player.get_absolute_url())
+
 
 class PlayerUpdate(UpdateView):
     model = Player
@@ -99,3 +102,9 @@ class PlayerUpdate(UpdateView):
 
     # def form_valid(self, form):
     #     return HttpResponseRedirect(self.get_success_url())
+
+
+class PlayerDelete(DeleteView):
+    model = Player
+    success_url = reverse_lazy('player_list')
+    template_name = 'registration/delete_tournament.html'

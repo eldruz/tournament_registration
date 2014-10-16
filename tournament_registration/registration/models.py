@@ -223,3 +223,6 @@ class Entry(models.Model):
         return self.player.__unicode__()\
             + ' in '\
             + self.tournament_id.__unicode__()
+
+    def get_absolute_url(self):
+        return reverse('tournament_detail', kwargs={'pk': self.tournament_id})

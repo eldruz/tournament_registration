@@ -1,0 +1,2 @@
+dev_server: cd $PROJECT_HOME && python manage.py runserver
+tests: cd $PROJECT_HOME && gorun.py settings.py

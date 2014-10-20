@@ -107,7 +107,7 @@ class Tournament(ValidateOnSaveMixin, models.Model):
         return self.title
 
     def get_absolute_url(self):
-        return reverse('tournament_detail', kwargs={'pk': self.pk})
+        return reverse('tournament_detail', kwargs={'slug': self.slug})
 
 
 class PlayerUtilitiesManager(models.Manager):
@@ -195,17 +195,22 @@ class Player(models.Model):
                             blank=True)
     registered_tournaments = models.ManyToManyField('Tournament',
                                                     through='Entry')
+    slug = models.SlugField('Player slug', max_length=256)
     objects = models.Manager()
     utilities = PlayerUtilitiesManager()
 
     class Meta:
         unique_together = (('name', 'team'))
 
+    def save(self, *args, **kwargs):
+        self.slug = slugify(self.team + '-' + self.name)
+        super(Player, self).save(*args, **kwargs)
+
     def __unicode__(self):
         return '[' + self.team + '] ' + self.name
 
     def get_absolute_url(self):
-        return reverse('player_detail', kwargs={'pk': self.pk})
+        return reverse('player_detail', kwargs={'slug': self.slug})
 
 
 class EntryUtilitiesManager(models.Manager):

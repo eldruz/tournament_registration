@@ -9,9 +9,9 @@ from .views import PlayersPerTournamentList
 
 
 urlpatterns = patterns('',
-    url(r'^tournaments/update/(?P<pk>[-_\w]+)/$',
+    url(r'^tournaments/update/(?P<slug>[-_\w]+)/$',
         TournamentUpdate.as_view(), name='update_tournament'),
-    url(r'^tournaments/delete/(?P<pk>[-_\w]+)/$',
+    url(r'^tournaments/delete/(?P<slug>[-_\w]+)/$',
         TournamentDelete.as_view(), name='delete_tournament'),
     url(r'^tournaments/create/$',
         TournamentCreate.as_view(), name='create_tournament'),

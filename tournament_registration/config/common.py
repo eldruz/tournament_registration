@@ -51,6 +51,7 @@ class Common(Configuration):
         'management',
         'payment',
         # Your stuff: custom apps go here
+        'django_extensions',
     )
 
     # See: https://docs.djangoproject.com/en/dev/ref/settings/#installed-apps

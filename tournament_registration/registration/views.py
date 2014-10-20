@@ -32,25 +32,21 @@ class PlayerDetail(DetailView):
 
 
 class PlayersPerTournamentList(ListView):
-    model = Entry
+    model = Tournament
     template_name = 'registration/player_tournament_list.html'
-    context_object_name = 'player_list'
+    context_object_name = 'tournament'
 
     def get_queryset(self):
         """Returns only the names of the player for the tournament"""
-        entry = Entry.utilities.\
-            get_players_per_tournament(self.kwargs['tournament_id'])
-        tourney = Tournament.objects.get(id=self.kwargs['tournament_id'])
-        self.tournament_name = tourney.title
-        self.tournament_date = tourney.date
-        return entry
+        tourney = Tournament.objects.get(slug=self.kwargs['slug'])
+        self.players = tourney.player_set.all()
+        return tourney
 
     def get_context_data(self, **kwargs):
         context = super(PlayersPerTournamentList, self).\
             get_context_data(**kwargs)
         # Add in the tournament name and date
-        context['tournament_name'] = self.tournament_name
-        context['tournament_date'] = self.tournament_date
+        context['players'] = self.players
         return context
 
 

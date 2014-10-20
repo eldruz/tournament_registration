@@ -1,7 +1,7 @@
-<h2> {{ tournament_name }} </h2>
-<h3> {{ tournament_date }} </h3>
+<h2> {{ tournament.title }} </h2>
+<h3> {{ tournament.date }} </h3>
     <ul>
-        {% for player in player_list %}
-        <li>{{ player.player }}</li>
+        {% for player in players %}
+        <li>{{ player.name }}</li>
         {% endfor %}
     </ul>

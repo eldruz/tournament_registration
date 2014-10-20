@@ -265,13 +265,6 @@ class EntryUtilitiesManager(models.Manager):
         else:
             return True
 
-    def get_players_per_tournament(self, tournament_id):
-        tourney = Tournament.objects.get(pk=tournament_id)
-        player_list = Entry.objects.\
-            filter(tournament_id=tournament_id).\
-            only('player')
-        return player_list
-
 
 class Entry(models.Model):
     """Entry model, which is the 'trough' table between Tournament & Player.

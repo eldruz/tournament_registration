@@ -1,6 +1,6 @@
 from django.db import models
+from django.utils.text import slugify
 from django.core.urlresolvers import reverse
-
 from django.core.exceptions import ValidationError
 from django.core.exceptions import ObjectDoesNotExist
 from django.http import Http404
@@ -85,6 +85,7 @@ class Tournament(ValidateOnSaveMixin, models.Model):
                                                    default=0)
     nb_per_team = models.PositiveSmallIntegerField('Number of players per team.',
                                                    default=1)
+    slug = models.SlugField('Tournament slug', max_length=256)
     objects   = models.Manager()
     utilities = TournamentUtilitiesManager()
 
@@ -97,6 +98,10 @@ class Tournament(ValidateOnSaveMixin, models.Model):
         if self.game not in [x[0] for x in self.GAME_LIST]:
             msg = u'Game is not in the games list'
             raise ValidationError(msg)
+
+    def save(self, *args, **kwargs):
+        self.slug = slugify(self.date.isoformat() + '-' + self.title)
+        super(Tournament, self).save(*args, **kwargs)
 
     def __unicode__(self):
         return self.title

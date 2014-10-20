@@ -113,6 +113,12 @@ class PlayerUtilitiesManager(models.Manager):
 
     """
     def create_player(self, name, **kwargs):
+        """Creates a new player and adds it to the database
+
+        :param name: Name of the player, the only required parameter
+        :param **kwargs: A dict containing additional parameters, which are
+            listed below.
+        """
         additional_attributes = {'id', 'team', 'registered_tournaments'}
         player = Player(name=name)
         for attribute, value in kwargs.items():
@@ -122,6 +128,18 @@ class PlayerUtilitiesManager(models.Manager):
         return player
 
     def update_player(self, org_name, org_team, **kwargs):
+        """Updates an existing player in the database.
+
+        There is two options to access a player's data:
+            *an id given in the kwargs parameter
+            *a name and a team, as players are designed with a unicity
+            constrint on the (name, team) couple of arguments
+
+        :param org_name: Original name of the player.
+        :param org_team: Original name of the team.
+        :param **kwargs: A dict containing additional parameters, which are
+            listed below.
+        """
         additional_attributes = {'id', 'name', 'team'}
         try:
             player = Player.objects.get(pk=kwargs.pop('id'))
@@ -135,6 +153,17 @@ class PlayerUtilitiesManager(models.Manager):
         return player
 
     def delete_player(self, name, team, id=None):
+        """Deletes a player from the database.
+
+        There is two options to access a player's data:
+            *an id given in the kwargs parameter
+            *a name and a team, as players are designed with a unicity
+            constrint on the (name, team) couple of arguments
+
+        :param name: Name of the player
+        :param team: Name of the team
+        :param id: Optional id of the player
+        """
         if id:
             player = Player.objects.get(pk=id)
         else:

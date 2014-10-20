@@ -127,7 +127,7 @@ class PlayerUtilitiesManager(models.Manager):
         player.save()
         return player
 
-    def update_player(self, org_name, org_team, **kwargs):
+    def update_player(self, player_id, **kwargs):
         """Updates an existing player in the database.
 
         There is two options to access a player's data:
@@ -135,17 +135,12 @@ class PlayerUtilitiesManager(models.Manager):
             *a name and a team, as players are designed with a unicity
             constrint on the (name, team) couple of arguments
 
-        :param org_name: Original name of the player.
-        :param org_team: Original name of the team.
+        :param player_id: ID of the existing player.
         :param **kwargs: A dict containing additional parameters, which are
             listed below.
         """
-        additional_attributes = {'id', 'name', 'team'}
-        try:
-            player = Player.objects.get(pk=kwargs.pop('id'))
-        except KeyError:
-            player = Player.objects.get(name=org_name,
-                                        team=org_team)
+        additional_attributes = {'name', 'team'}
+        player = Player.objects.get(pk=player_id)
         for attribute, value in kwargs.items():
             assert attribute in additional_attributes
             setattr(player, attribute, value)
@@ -186,6 +181,7 @@ class Player(models.Model):
         the tournaments the player is registered in
 
     """
+    id = models.AutoField(primary_key=True)
     name = models.CharField('Nickname of the player',
                             max_length=256,
                             blank=False)
@@ -235,6 +231,16 @@ class EntryUtilitiesManager(models.Manager):
                             player=player)
                 entry.save()
                 return entry
+
+    def register_tournaments(self, player, registered, unregister=False):
+        if unregister:
+            unregistered_tournaments = \
+                Entry.objects.\
+                exclude(tournament_id__in=registered).\
+                filter(player=player)
+            unregistered_tournaments.delete()
+        for tournament in registered:
+            Entry.utilities.create_entry(tournament, player)
 
     def is_tournament_full(self, tournament):
         # We get the number of registered players in the tournaments

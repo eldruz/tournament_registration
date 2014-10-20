@@ -88,10 +88,14 @@ class PlayerCreate(CreateView):
     template_name = 'registration/create_tournament.html'
 
     def form_valid(self, form):
+        # Player information given to the form
         player = form.save(commit=False)
-        player.save()
-        for tournament in form.cleaned_data.get('registered_tournaments'):
-            Entry.utilities.create_entry(tournament, player)
+        # The player is updated with additional id attribute given by the
+        # creation function and needed for the entry model
+        player = Player.utilities.create_player(name=player.name,
+                                                team=player.team)
+        registered = form.cleaned_data.get('registered_tournaments')
+        Entry.utilities.register_tournaments(player, registered)
         return HttpResponseRedirect(player.get_absolute_url())
 
 
@@ -102,17 +106,11 @@ class PlayerUpdate(UpdateView):
 
     def form_valid(self, form):
         player = form.save(commit=False)
-        player.save()
-        # Unregister every tournament that has not been checked
-        registered_tournaments = form.cleaned_data['registered_tournaments']
-        unregistered_tournaments = \
-            Entry.objects.\
-            exclude(tournament_id__in=registered_tournaments).\
-            filter(player=player)
-        unregistered_tournaments.delete()
-        # Register all the checked tournaments
-        for tournament in registered_tournaments:
-            Entry.utilities.create_entry(tournament, player)
+        player = Player.utilities.update_player(player_id=player.pk,
+                                                name=player.name,
+                                                team=player.team)
+        registered = form.cleaned_data.get('registered_tournaments')
+        Entry.utilities.register_tournaments(player, registered, unregister=True)
         return HttpResponseRedirect(player.get_absolute_url())
 
 

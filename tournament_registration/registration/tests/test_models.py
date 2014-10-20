@@ -58,8 +58,9 @@ class PlayerTestCase(TestCase):
         self.assertIsInstance(player, Player)
 
     def test_player_update(self):
-        Player.utilities.update_player(org_name='Eldruz',
-                                       org_team='3HC',
+        player = Player.objects.get(name='Eldruz',
+                                    team='3HC')
+        Player.utilities.update_player(player_id=player.pk,
                                        name='The Eldruz',
                                        team='F3HC')
         # The updated player exists in the database

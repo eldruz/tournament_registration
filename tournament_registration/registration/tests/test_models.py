@@ -47,6 +47,43 @@ class TournamentTestCase(TestCase):
                           nb_max=32)
 
 
+class PlayerTestCase(TestCase):
+    def setUp(self):
+        Player.utilities.create_player(name='Eldruz',
+                                       team='3HC')
+
+    def test_player_creation(self):
+        player = Player.objects.get(name='Eldruz',
+                                    team='3HC')
+        self.assertIsInstance(player, Player)
+
+    def test_player_update(self):
+        Player.utilities.update_player(org_name='Eldruz',
+                                       org_team='3HC',
+                                       name='The Eldruz',
+                                       team='F3HC')
+        # The updated player exists in the database
+        player = Player.objects.get(name='The Eldruz',
+                                    team='F3HC')
+        self.assertIsInstance(player, Player)
+        # The old one does not
+        self.assertRaises(ObjectDoesNotExist,
+                          Player.objects.get,
+                          name='Eldruz',
+                          team='3HC')
+
+    def test_player_delete(self):
+        player = Player.utilities.create_player(name='SGwada',
+                                                team='3HC')
+        self.assertIsInstance(player, Player)
+        Player.utilities.delete_player(name='SGwada',
+                                       team='3HC')
+        self.assertRaises(ObjectDoesNotExist,
+                          Player.objects.get,
+                          name='SGwada',
+                          team='3HC')
+
+
 class EntryTestCase(TestCase):
     def setUp(self):
         tourney = Tournament.utilities.create_tournament(title='X-MANIA',
@@ -63,7 +100,7 @@ class EntryTestCase(TestCase):
         tournament = Tournament.objects.get(pk=100)
         player = Player.objects.get(name='Komoda')
         entry = Entry.objects.select_related('tournament_id').\
-            get(tournament_id=100, player='Komoda')
+            get(tournament_id=tournament, player=player)
         self.assertEqual(tournament, entry.tournament_id)
         self.assertEqual(player, entry.player)
 

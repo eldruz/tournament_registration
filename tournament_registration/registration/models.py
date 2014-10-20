@@ -121,6 +121,27 @@ class PlayerUtilitiesManager(models.Manager):
         player.save()
         return player
 
+    def update_player(self, org_name, org_team, **kwargs):
+        additional_attributes = {'id', 'name', 'team'}
+        try:
+            player = Player.objects.get(pk=kwargs.pop('id'))
+        except KeyError:
+            player = Player.objects.get(name=org_name,
+                                        team=org_team)
+        for attribute, value in kwargs.items():
+            assert attribute in additional_attributes
+            setattr(player, attribute, value)
+        player.save()
+        return player
+
+    def delete_player(self, name, team, id=None):
+        if id:
+            player = Player.objects.get(pk=id)
+        else:
+            player = Player.objects.get(name=name,
+                                        team=team)
+        player.delete()
+
 
 class Player(models.Model):
     """The Player model.

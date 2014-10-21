@@ -100,7 +100,7 @@ class Tournament(ValidateOnSaveMixin, models.Model):
             raise ValidationError(msg)
 
     def save(self, *args, **kwargs):
-        self.slug = slugify(self.date.isoformat() + '-' + self.title)
+        self.slug = slugify(unicode(self.date.isoformat() + '-' + self.title))
         super(Tournament, self).save(*args, **kwargs)
 
     def __unicode__(self):
@@ -203,7 +203,7 @@ class Player(models.Model):
         unique_together = (('name', 'team'))
 
     def save(self, *args, **kwargs):
-        self.slug = slugify(self.team + '-' + self.name)
+        self.slug = slugify(unicode(self.team + '-' + self.name))
         super(Player, self).save(*args, **kwargs)
 
     def __unicode__(self):

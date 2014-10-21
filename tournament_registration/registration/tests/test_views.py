@@ -3,6 +3,7 @@ from datetime import date
 from django.test import TestCase
 from django.core.urlresolvers import reverse
 from django.utils.text import slugify
+from django.core.exceptions import ObjectDoesNotExist
 
 from registration.models import Tournament, Entry, Player
 from registration.views import TournamentDetail
@@ -136,3 +137,152 @@ class PlayersPerTournamentListTestCase(TestCase):
             ['<Player: [MCZ] Daigo>']
         )
 
+
+class PlayerCreateTestCase(TestCase):
+    def test_cannot_create_player_with_no_tournaments(self):
+        response = self.client.get(reverse('create_player'))
+        self.assertEqual(response.status_code, 200)
+        response = self.client.post(reverse('create_player'),
+                                    {'name':'Tokido', 'team':'MCZ'},
+                                    follow=True)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.redirect_chain, [])
+        self.assertRaises(ObjectDoesNotExist,
+                          Player.objects.get,
+                          name='Tokido',
+                          team='MCZ')
+
+    def test_create_player_valid_form(self):
+        tourney = Tournament.utilities.create_tournament(
+            title='Tougekiche',
+            game='2X',
+            date=date.today(),
+            nb_max=64
+        )
+        response = self.client.get(reverse('create_player'))
+        self.assertEqual(response.status_code, 200)
+        response = self.client.post(reverse('create_player'),
+                                    {'name':'Tokido',
+                                     'team':'MCZ',
+                                     'registered_tournaments':(tourney.pk)},
+                                    follow=True)
+        self.assertEqual(response.status_code, 200)
+        self.assertRedirects(
+            response,
+            reverse('player_detail', kwargs={'slug': 'mcz-tokido'})
+        )
+        self.assertIsInstance(
+            Player.objects.get(name='Tokido', team='MCZ'),
+            Player
+        )
+
+
+class PlayerUpdateTestCase(TestCase):
+    def test_update_player_valid_form(self):
+        # We create 1 player and 2 tournaments and register the player
+        # to both tournaments
+        player = Player.utilities.create_player(name='Taira')
+        tourney1 = Tournament.utilities.create_tournament(
+            title='Tougekiche',
+            game='2X',
+            date=date.today(),
+            nb_max=64
+        )
+        tourney2 = Tournament.utilities.create_tournament(
+            title='NantesGeki',
+            game='2X',
+            date=date.today(),
+            nb_max=64
+        )
+        Entry.utilities.create_entry(tournament=tourney1, player=player)
+        Entry.utilities.create_entry(tournament=tourney2, player=player)
+        # Checking the data is correct
+        response = self.client.get(reverse('update_player',
+                                           kwargs={'slug':player.slug}))
+        self.assertEqual(response.status_code, 200)
+        # Changing the form to change the player
+        response = self.client.post(reverse('update_player',
+                                            kwargs={'slug':player.slug}),
+                                    {'name':'YuVega',
+                                     'team':'DICTATOR',
+                                     'registered_tournaments':(tourney1.pk)},
+                                    follow=True)
+        # No errors and redirection is okay
+        self.assertEqual(response.status_code, 200)
+        self.assertRedirects(
+            response,
+            reverse('player_detail', kwargs={'slug': 'dictator-yuvega'})
+        )
+        # Player has been updated
+        self.assertIsInstance(
+            Player.objects.get(pk=player.pk, name='YuVega', team='DICTATOR'),
+            Player
+        )
+        # Old player does not exist anymore
+        self.assertRaises(ObjectDoesNotExist,
+                          Player.objects.get,
+                          name='Taira',
+                          team='')
+
+
+class TournamentCreateTestCase(TestCase):
+    def test_create_tournament_valid_form(self):
+        response = self.client.get(reverse('create_tournament'))
+        self.assertEqual(response.status_code, 200)
+        response = self.client.post(reverse('create_tournament'),
+                                    {'title':'Tournoi Des Sacs',
+                                     'game':'2X',
+                                     'date':date.today(),
+                                     'support':'Arcade',
+                                     'nb_max':32,
+                                     'price':10,
+                                     'nb_per_team':1},
+                                    follow=True)
+        self.assertEqual(response.status_code, 200)
+        slug = slugify(unicode(date.today().isoformat() + '-' + 'Tournoi des Sacs'))
+        self.assertRedirects(
+            response,
+            reverse('tournament_detail', kwargs={'slug': slug})
+        )
+        self.assertIsInstance(
+            Tournament.objects.get(title='Tournoi Des Sacs'),
+            Tournament
+        )
+
+
+class TournamentUpdateTestCase(TestCase):
+    def test_update_tournament_valid_form(self):
+        tourney = Tournament.utilities.create_tournament(
+            title='NantesGeki',
+            game='2X',
+            date=date.today(),
+            nb_max=64
+        )
+        response = self.client.get(reverse('update_tournament',
+                                           kwargs={'slug': tourney.slug}))
+        self.assertEqual(response.status_code, 200)
+        response = self.client.post(reverse('update_tournament',
+                                            kwargs={'slug': tourney.slug}),
+                                    {'title':'Tournoi Des Sacs',
+                                     'game':'2X',
+                                     'date':date.today(),
+                                     'support':'Arcade',
+                                     'nb_max':32,
+                                     'price':10,
+                                     'nb_per_team':1},
+                                    follow=True)
+        self.assertEqual(response.status_code, 200)
+        slug = slugify(unicode(
+            date.today().isoformat() + '-' + 'Tournoi des Sacs'
+        ))
+        self.assertRedirects(
+            response,
+            reverse('tournament_detail', kwargs={'slug': slug})
+        )
+        self.assertIsInstance(
+            Tournament.objects.get(title='Tournoi Des Sacs'),
+            Tournament
+        )
+        self.assertRaises(ObjectDoesNotExist,
+                          Tournament.objects.get,
+                          title='NantesGeki')

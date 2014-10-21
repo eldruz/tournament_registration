@@ -254,8 +254,8 @@ class EntryUtilitiesManager(models.Manager):
 
     def is_tournament_full(self, tournament):
         # We get the number of registered players in the tournaments
-        nb_registered = Entry.utilities.\
-            get_players_per_tournament(tournament.id).\
+        nb_registered = Entry.objects.\
+            filter(tournament_id = tournament).\
             count()
         # Maximum number of attendees
         nb_max = tournament.nb_max

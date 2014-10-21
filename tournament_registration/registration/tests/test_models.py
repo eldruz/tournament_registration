@@ -125,11 +125,8 @@ class EntryTestCase(TestCase):
                                      player=player)
         Entry.utilities.create_entry(tournament=tourney,
                                      player=player)
-        self.assertEqual(Entry.objects.filter(tournament_id=8).count(),
-                         1)
-
-    def test_queries_404(self):
-        """Queries of players or tournaments in custom manager functions"""
-        self.assertRaises(ObjectDoesNotExist,
-                          Entry.utilities.get_players_per_tournament,
-                          tournament_id=12)
+        # self.assertRaises(IntegrityError,
+        #                   Entry.utilities.create_entry,
+        #                   tournament=tourney,
+        #                   player=player)
+        self.assertEqual(Entry.objects.filter(tournament_id=8).count(),1)

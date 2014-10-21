@@ -135,11 +135,6 @@ class PlayerUtilitiesManager(models.Manager):
     def update_player(self, player_id, **kwargs):
         """Updates an existing player in the database.
 
-        There is two options to access a player's data:
-            *an id given in the kwargs parameter
-            *a name and a team, as players are designed with a unicity
-            constrint on the (name, team) couple of arguments
-
         :param player_id: ID of the existing player.
         :param **kwargs: A dict containing additional parameters, which are
             listed below.

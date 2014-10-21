@@ -2,6 +2,8 @@ from django.shortcuts import render
 from django.core.urlresolvers import reverse_lazy
 from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect
+from django.http import Http404
+from django.core.exceptions import ObjectDoesNotExist
 
 from django.views.generic import ListView
 from django.views.generic import DetailView
@@ -27,6 +29,7 @@ class TournamentDetail(DetailView):
 class PlayerList(ListView):
     model = Player
 
+
 class PlayerDetail(DetailView):
     model = Player
 
@@ -38,7 +41,10 @@ class PlayersPerTournamentList(ListView):
 
     def get_queryset(self):
         """Returns only the names of the player for the tournament"""
-        tourney = Tournament.objects.get(slug=self.kwargs['slug'])
+        try:
+            tourney = Tournament.objects.get(slug=self.kwargs['slug'])
+        except ObjectDoesNotExist:
+            raise Http404
         self.players = tourney.player_set.all()
         return tourney
 
@@ -102,10 +108,10 @@ class PlayerUpdate(UpdateView):
 
     def form_valid(self, form):
         player = form.save(commit=False)
+        registered = form.cleaned_data.get('registered_tournaments')
         player = Player.utilities.update_player(player_id=player.pk,
                                                 name=player.name,
                                                 team=player.team)
-        registered = form.cleaned_data.get('registered_tournaments')
         Entry.utilities.register_tournaments(player, registered, unregister=True)
         return HttpResponseRedirect(player.get_absolute_url())
 

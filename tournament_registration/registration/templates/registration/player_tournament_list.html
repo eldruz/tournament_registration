@@ -1,7 +1,9 @@
 <h2> {{ tournament.title }} </h2>
 <h3> {{ tournament.date }} </h3>
     <ul>
-        {% for player in players %}
+    {% for player in players %}
         <li>{{ player.name }}</li>
-        {% endfor %}
+    {% empty %}
+        <li>No players are registered</li>
+    {% endfor %}
     </ul>

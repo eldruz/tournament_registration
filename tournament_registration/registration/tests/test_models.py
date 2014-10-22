@@ -99,7 +99,7 @@ class PlayerTestCase(TestCase):
                           name='SGwada',
                           team='3HC')
         # Delete player2 with id
-        Player.utilities.delete_player(id=player2.pk)
+        Player.utilities.delete_player(player_id=player2.pk)
         self.assertRaises(ObjectDoesNotExist,
                           Player.objects.get,
                           pk=player2.pk)

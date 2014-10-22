@@ -31,6 +31,16 @@ class TournamentUtilitiesManager(models.Manager):
 
     """
     def create_tournament(self, title, game, date, nb_max, **kwargs):
+        """Utily function to create a tournament.
+
+        It might not be that useful... Keeping it for the time being.
+
+        :param title: Title of the tournament
+        :param game: Game played during the tournament
+        :param date: Date of the tournament
+        :param nb_max: Maximum number of entries
+        :param **kwargs: Optional arguments id, support, price and nb_per_team
+        """
         additional_attributes = {'id', 'support', 'price', 'nb_per_team'}
         tourney = Tournament(title=title,
                              game=game,
@@ -46,16 +56,15 @@ class TournamentUtilitiesManager(models.Manager):
 class Tournament(ValidateOnSaveMixin, models.Model):
     """Tournament Model.
 
-    Attributes:
-        title: Title of the tournament
-        game: The game the tournament willl be played on. For now, we assume
-        that a tournament can only run one game
-        date: The day of the tournament
-        support: Usually either the name of the console, PC or arcade
-        nb_max: The maximum amount of players that can register
-        nb_per_team: The number of players per team
-        objects: The default Manager for django to use
-        utilities: The manager used to create or update tournaments
+    :param title: Title of the tournament
+    :param game: The game the tournament willl be played on. For now, we assume \
+    that a tournament can only run one game
+    :param date: The day of the tournament
+    :param support: Usually either the name of the console, PC or arcade
+    :param nb_max: The maximum amount of players that can register
+    :param nb_per_team: The number of players per team
+    :param objects: The default Manager for django to use
+    :param utilities: The manager used to create or update tournaments
 
     """
     # For now the game list is hardcoded in the model
@@ -100,6 +109,7 @@ class Tournament(ValidateOnSaveMixin, models.Model):
             raise ValidationError(msg)
 
     def save(self, *args, **kwargs):
+        " Override the save method to automatically set the slug "
         self.slug = slugify(unicode(self.date.isoformat() + '-' + self.title))
         super(Tournament, self).save(*args, **kwargs)
 
@@ -147,7 +157,7 @@ class PlayerUtilitiesManager(models.Manager):
         player.save()
         return player
 
-    def delete_player(self, name='', team='', id=None):
+    def delete_player(self, name='', team='', player_id=None):
         """Deletes a player from the database.
 
         There is two options to access a player's data:
@@ -157,10 +167,10 @@ class PlayerUtilitiesManager(models.Manager):
 
         :param name: Name of the player
         :param team: Name of the team
-        :param id: Optional id of the player
+        :param player_id: Optional id of the player
         """
-        if id:
-            player = Player.objects.get(pk=id)
+        if player_id:
+            player = Player.objects.get(pk=player_id)
         else:
             player = Player.objects.get(name=name,
                                         team=team)
@@ -173,12 +183,10 @@ class Player(models.Model):
     Represents the players that will register at tournaments. We only need
     the minimal information about them, usually only their nicknames.
 
-    Attributes:
-        name: The nickname of the player, which acts as a primary key to the
-        model. Sorry for those of you who share nicknames
-        team: Optional name of the team that the player is part of
-        registered_tournaments: A many to many field that represents all
-        the tournaments the player is registered in
+    :param name: The nickname of the player
+    :param team: Optional name of the team that the player is part of
+    :param registered_tournaments: A many to many field that represents all \
+    the tournaments the player is registered in
 
     """
     id = models.AutoField(primary_key=True)
@@ -198,6 +206,7 @@ class Player(models.Model):
         unique_together = (('name', 'team'))
 
     def save(self, *args, **kwargs):
+        " Override the save method to automatically set the slug "
         self.slug = slugify(unicode(self.team + '-' + self.name))
         super(Player, self).save(*args, **kwargs)
 
@@ -216,12 +225,15 @@ class EntryUtilitiesManager(models.Manager):
 
     """
     def create_entry(self, tournament, player):
-        """A function that adds an entry according to a set of constraints.
+        """Adds an entry according to a set of constraints.
 
-        First of all, we cannot add an entry to a full tournament, that is
-        we cannot have more entries than the maximum number of attendees
-        specified in the tournament specs.
+        For now the only constraint is that a player cannot be registered into \
+        a tournament that is already full.
+        If the function is called to create an already existing entry, it \
+        merely returns the entry withou doing anything database wise.
 
+        :param tournament: The tournament that is being registered to
+        :param player: The player that is regitering
         """
         try:
             already_registered = Entry.objects.get(tournament_id=tournament,
@@ -238,6 +250,16 @@ class EntryUtilitiesManager(models.Manager):
                 return entry
 
     def register_tournaments(self, player, registered, unregister=False):
+        """Registers a given player to a number of tournaments.
+
+        If the unregister parameter is set to True, the function will also \
+        unregister the player from all the existing tournaments that are not \
+        listed in the registered parameter.
+
+        :param player: The player to register
+        :param registered: The tournaments that are being registered to
+        :param unregister: A boolean that triggers the unregistration process
+        """
         if unregister:
             unregistered_tournaments = \
                 Entry.objects.\
@@ -248,6 +270,10 @@ class EntryUtilitiesManager(models.Manager):
             Entry.utilities.create_entry(tournament, player)
 
     def is_tournament_full(self, tournament):
+        """Checks if a given tournament is full.
+
+        :param tournament: The tournament to check
+        """
         # We get the number of registered players in the tournaments
         nb_registered = Entry.objects.\
             filter(tournament_id = tournament).\
@@ -264,11 +290,10 @@ class EntryUtilitiesManager(models.Manager):
 class Entry(models.Model):
     """Entry model, which is the 'trough' table between Tournament & Player.
 
-    Attributes:
-        tournament_id: The foreign key to the Tournament model
-        player: The foreign key to the Player model
-        objects: The default Manager for django to use
-        utilities: The utility manager used to create or update entries
+    param: tournament_id: The foreign key to the Tournament model
+    param: player: The foreign key to the Player model
+    param: objects: The default Manager for django to use
+    param: utilities: The utility manager used to create or update entries
 
     """
     tournament_id = models.ForeignKey('Tournament')

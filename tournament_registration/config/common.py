@@ -35,6 +35,7 @@ class Common(Configuration):
 
         # Admin
         'django.contrib.admin',
+        'django.contrib.admindocs',
     )
     THIRD_PARTY_APPS = (
         'crispy_forms',  # Form layouts

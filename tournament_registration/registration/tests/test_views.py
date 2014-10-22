@@ -200,6 +200,10 @@ class PlayerUpdateTestCase(TestCase):
         response = self.client.get(reverse('update_player',
                                            kwargs={'slug':player.slug}))
         self.assertEqual(response.status_code, 200)
+        self.assertEqual(
+            response.context['player'],
+            player
+        )
         # Changing the form to change the player
         response = self.client.post(reverse('update_player',
                                             kwargs={'slug':player.slug}),
@@ -223,6 +227,42 @@ class PlayerUpdateTestCase(TestCase):
                           Player.objects.get,
                           name='Taira',
                           team='')
+
+
+class PlayerDeleteTestCase(TestCase):
+    def test_delete_unexisting_player(self):
+        response = self.client.post(reverse('delete_player',
+                                           kwargs={'slug':'neant'}))
+        self.assertEqual(response.status_code, 404)
+
+    def test_delete_existing_player(self):
+        player = Player.utilities.create_player(name='MAO')
+        tourney = Tournament.utilities.create_tournament(
+            title='Tougekiche',
+            game='2X',
+            date=date.today(),
+            nb_max=64
+        )
+        response = self.client.get(reverse('delete_player',
+                                           kwargs={'slug':player.slug}))
+        # Checking the data is correct
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(
+            response.context['player'],
+            player
+        )
+        # Deleting the player
+        response = self.client.post(reverse('delete_player',
+                                            kwargs={'slug':player.slug}))
+        # No errors and redirection ok
+        self.assertRedirects(
+            response,
+            reverse('player_list')
+        )
+        # Old player doesn't exist
+        self.assertRaises(ObjectDoesNotExist,
+                          Player.objects.get,
+                          name='MAO')
 
 
 class TournamentCreateTestCase(TestCase):
@@ -260,7 +300,13 @@ class TournamentUpdateTestCase(TestCase):
         )
         response = self.client.get(reverse('update_tournament',
                                            kwargs={'slug': tourney.slug}))
+        # Checking the data is correct
         self.assertEqual(response.status_code, 200)
+        self.assertEqual(
+            response.context['tournament'],
+            tourney
+        )
+        # Updating the data
         response = self.client.post(reverse('update_tournament',
                                             kwargs={'slug': tourney.slug}),
                                     {'title':'Tournoi Des Sacs',
@@ -271,6 +317,7 @@ class TournamentUpdateTestCase(TestCase):
                                      'price':10,
                                      'nb_per_team':1},
                                     follow=True)
+        # No errors and redirection ok
         self.assertEqual(response.status_code, 200)
         slug = slugify(unicode(
             date.today().isoformat() + '-' + 'Tournoi des Sacs'
@@ -279,10 +326,47 @@ class TournamentUpdateTestCase(TestCase):
             response,
             reverse('tournament_detail', kwargs={'slug': slug})
         )
+        # Tournament has been updated
         self.assertIsInstance(
             Tournament.objects.get(title='Tournoi Des Sacs'),
             Tournament
         )
+        # Old tournament doesn't exist
+        self.assertRaises(ObjectDoesNotExist,
+                          Tournament.objects.get,
+                          title='NantesGeki')
+
+
+class TournamentDeleteTestCase(TestCase):
+    def test_delete_unexisting_tournament(self):
+        response = self.client.post(reverse('delete_tournament',
+                                           kwargs={'slug':'neant'}))
+        self.assertEqual(response.status_code, 404)
+
+    def test_delete_existing_tournament(self):
+        tourney = Tournament.utilities.create_tournament(
+            title='NantesGeki',
+            game='2X',
+            date=date.today(),
+            nb_max=64
+        )
+        response = self.client.get(reverse('delete_tournament',
+                                           kwargs={'slug': tourney.slug}))
+        # Checking the data is correct
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(
+            response.context['tournament'],
+            tourney
+        )
+        # Deleting the tournament
+        response = self.client.post(reverse('delete_tournament',
+                                            kwargs={'slug': tourney.slug}))
+        # No errors and redirection ok
+        self.assertRedirects(
+            response,
+            reverse('tournament_list')
+        )
+        # Old tournament doesn't exist
         self.assertRaises(ObjectDoesNotExist,
                           Tournament.objects.get,
                           title='NantesGeki')

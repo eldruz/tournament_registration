@@ -78,12 +78,6 @@ class TournamentDelete(DeleteView):
     template_name = 'registration/delete_tournament.html'
 
 
-class EntryCreateView(CreateView):
-    model = Entry
-    fields = ['tournament_id', 'player']
-    template_name = 'registration/create_tournament.html'
-
-
 class PlayerCreate(CreateView):
     model = Player
     form_class = PlayerForm

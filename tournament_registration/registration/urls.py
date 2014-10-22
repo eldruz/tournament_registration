@@ -2,7 +2,6 @@ from django.conf.urls import patterns, url
 
 from .views import TournamentDetail, TournamentCreate, TournamentDelete, \
     TournamentUpdate, TournamentList
-from .views import EntryCreateView
 from .views import PlayerCreate, PlayerUpdate, PlayerDetail, PlayerList, \
     PlayerDelete
 from .views import PlayersPerTournamentList
@@ -21,8 +20,6 @@ urlpatterns = patterns('',
         TournamentDetail.as_view(), name='tournament_detail'),
     url(r'^tournaments/$',
         TournamentList.as_view(), name='tournament_list'),
-    url(r'^entries/create/$',
-        EntryCreateView.as_view(), name='create_entry'),
     url(r'^players/update/(?P<slug>[-_\w]+)/$',
         PlayerUpdate.as_view(), name='update_player'),
     url(r'^players/delete/(?P<slug>[-_\w]+)/$',

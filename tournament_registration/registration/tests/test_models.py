@@ -85,15 +85,24 @@ class PlayerTestCase(TestCase):
                           team='3HC')
 
     def test_player_delete(self):
-        player = Player.utilities.create_player(name='SGwada',
+        player1 = Player.utilities.create_player(name='SGwada',
                                                 team='3HC')
-        self.assertIsInstance(player, Player)
+        player2 = Player.utilities.create_player(name='Nono',
+                                                team='3HC')
+        self.assertIsInstance(player1, Player)
+        self.assertIsInstance(player2, Player)
+        # Delete player1 with name and team
         Player.utilities.delete_player(name='SGwada',
                                        team='3HC')
         self.assertRaises(ObjectDoesNotExist,
                           Player.objects.get,
                           name='SGwada',
                           team='3HC')
+        # Delete player2 with id
+        Player.utilities.delete_player(id=player2.pk)
+        self.assertRaises(ObjectDoesNotExist,
+                          Player.objects.get,
+                          pk=player2.pk)
 
 
 class EntryTestCase(TestCase):

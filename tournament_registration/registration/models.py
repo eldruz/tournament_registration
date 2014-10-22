@@ -147,7 +147,7 @@ class PlayerUtilitiesManager(models.Manager):
         player.save()
         return player
 
-    def delete_player(self, name, team, id=None):
+    def delete_player(self, name='', team='', id=None):
         """Deletes a player from the database.
 
         There is two options to access a player's data:

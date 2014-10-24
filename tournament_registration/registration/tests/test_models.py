@@ -132,10 +132,10 @@ class EntryTestCase(TestCase):
             date=date.today(),
             nb_max=1)
         straw_player = Player.utilities.create_player(name='Dourssin')
-        self.assertFalse(Entry.utilities.is_tournament_full(tourney))
+        self.assertEqual(tourney.get_available_spots(), 1)
         Entry.utilities.create_entry(tournament=tourney,
                                      player=straw_player)
-        self.assertTrue(Entry.utilities.is_tournament_full(tourney))
+        self.assertEqual(tourney.get_available_spots(), 0)
 
 
     def test_maximum_number_of_players_registered(self):

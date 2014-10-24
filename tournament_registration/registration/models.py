@@ -119,6 +119,14 @@ class Tournament(ValidateOnSaveMixin, models.Model):
     def get_absolute_url(self):
         return reverse('tournament_detail', kwargs={'slug': self.slug})
 
+    def get_available_spots(self):
+        """Returns the number of spots available for new entries."""
+        # Checking the number of entries for this tournament
+        nb_registered = Entry.objects.\
+            filter(tournament_id = self).\
+            count()
+        return self.nb_max - nb_registered
+
 
 class PlayerUtilitiesManager(models.Manager):
     """Manager for creating and updating players in tournaments.
@@ -240,14 +248,14 @@ class EntryUtilitiesManager(models.Manager):
                                                    player=player)
             return already_registered
         except ObjectDoesNotExist:
-            if self.is_tournament_full(tournament):
-                msg = 'The tournament is full.'
-                raise ValidationError(msg)
-            else:
+            if tournament.get_available_spots() > 0:
                 entry = Entry(tournament_id=tournament,
                             player=player)
                 entry.save()
                 return entry
+            else:
+                msg = 'The tournament is full.'
+                raise ValidationError(msg)
 
     def register_tournaments(self, player, registered, unregister=False):
         """Registers a given player to a number of tournaments.
@@ -268,23 +276,6 @@ class EntryUtilitiesManager(models.Manager):
             unregistered_tournaments.delete()
         for tournament in registered:
             Entry.utilities.create_entry(tournament, player)
-
-    def is_tournament_full(self, tournament):
-        """Checks if a given tournament is full.
-
-        :param tournament: The tournament to check
-        """
-        # We get the number of registered players in the tournaments
-        nb_registered = Entry.objects.\
-            filter(tournament_id = tournament).\
-            count()
-        # Maximum number of attendees
-        nb_max = tournament.nb_max
-
-        if nb_registered < nb_max:
-            return False
-        else:
-            return True
 
 
 class Entry(models.Model):

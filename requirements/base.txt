@@ -14,6 +14,8 @@ django-floppyforms==1.2.0
 
 # Models
 django-model-utils==2.2
+django-prices==0.3.4
+prices==0.5.1
 
 # images
 Pillow==2.5.3

@@ -49,8 +49,8 @@ class Common(Configuration):
     LOCAL_APPS = (
         'users',  # custom users app
         'registration',
-        'management',
         'payment',
+        'capitalism',
         # Your stuff: custom apps go here
         'django_extensions',
     )

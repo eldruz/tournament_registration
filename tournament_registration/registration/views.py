@@ -68,7 +68,7 @@ class TournamentCreate(CreateView):
     """Creates a tournament."""
     model = Tournament
     fields = ['title', 'game', 'date', 'support',\
-              'nb_max', 'price', 'nb_per_team']
+              'nb_max', 'nb_per_team']
     template_name = 'registration/create_tournament.html'
 
 
@@ -76,7 +76,7 @@ class TournamentUpdate(UpdateView):
     """Updates a tournament."""
     model = Tournament
     fields = ['title', 'game', 'date', 'support',\
-              'nb_max', 'price', 'nb_per_team']
+              'nb_max', 'nb_per_team']
     template_name = 'registration/create_tournament.html'
 
 

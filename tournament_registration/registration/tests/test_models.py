@@ -25,7 +25,6 @@ class TournamentTestCase(TestCase):
         self.assertEqual(tourney.nb_max, 64)
         self.assertEqual(tourney.support, u'Unknown')
         self.assertEqual(tourney.nb_per_team, 1)
-        self.assertEqual(tourney.price, 0)
         self.assertEqual(tourney.id, 5)
 
     def test_cannot_create_duplicate(self):

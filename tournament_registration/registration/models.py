@@ -39,9 +39,9 @@ class TournamentUtilitiesManager(models.Manager):
         :param game: Game played during the tournament
         :param date: Date of the tournament
         :param nb_max: Maximum number of entries
-        :param **kwargs: Optional arguments id, support, price and nb_per_team
+        :param **kwargs: Optional arguments id, support and nb_per_team
         """
-        additional_attributes = {'id', 'support', 'price', 'nb_per_team'}
+        additional_attributes = {'id', 'support', 'nb_per_team'}
         tourney = Tournament(title=title,
                              game=game,
                              date=date,
@@ -90,8 +90,6 @@ class Tournament(ValidateOnSaveMixin, models.Model):
     nb_max      = models.PositiveSmallIntegerField('Max number of participants.',
                                                    blank=False,
                                                    default=32)
-    price       = models.PositiveSmallIntegerField('Entry fee',
-                                                   default=0)
     nb_per_team = models.PositiveSmallIntegerField('Number of players per team.',
                                                    default=1)
     slug = models.SlugField('Tournament slug', max_length=256)

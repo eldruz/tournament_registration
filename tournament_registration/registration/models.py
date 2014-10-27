@@ -100,14 +100,11 @@ class Tournament(ValidateOnSaveMixin, models.Model):
         " A tournament title can only be associated with a single date "
         unique_together = (('title', 'date'))
 
-    def clean(self):
-        " A game has to be on the game list "
+    def save(self, *args, **kwargs):
+        " Override the save method to set the slug and validate the game "
         if self.game not in [x[0] for x in self.GAME_LIST]:
             msg = u'Game is not in the games list'
             raise ValidationError(msg)
-
-    def save(self, *args, **kwargs):
-        " Override the save method to automatically set the slug "
         self.slug = slugify(unicode(self.date.isoformat() + '-' + self.title))
         super(Tournament, self).save(*args, **kwargs)
 

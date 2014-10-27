@@ -59,7 +59,7 @@ class TournamentProduct(Product):
     utilities = TournamentProductUtilitiesManager()
 
     def get_stock(self):
-        return stock
+        return self.stock
 
     def save(self, *args, **kwargs):
         " Override the save method to check the stock "

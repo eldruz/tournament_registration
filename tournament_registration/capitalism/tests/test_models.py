@@ -3,6 +3,7 @@ from datetime import date
 from django.test import TestCase
 from django.utils import timezone
 from django.core.exceptions import ObjectDoesNotExist
+from django.core.exceptions import ValidationError
 from django.db import IntegrityError
 
 from registration.models import Tournament
@@ -16,7 +17,7 @@ class TournamentProductTestCase(TestCase):
             date=date.today(),
             nb_max=64,
         )
-        TournamentProduct.utilities.createTournamentProduct(
+        TournamentProduct.utilities.create_tournament_product(
             tournament=tourney,
             price=10.50
         )
@@ -32,14 +33,30 @@ class TournamentProductTestCase(TestCase):
                              date=date.today(),
                              nb_max=16)
         self.assertRaises(IntegrityError,
-                          TournamentProduct.utilities.createTournamentProduct,
+                          TournamentProduct.utilities.create_tournament_product,
                           tournament=tourney,
                           price=5.25)
+
+    def test_tournament_product_too_much_stock(self):
+        tourney = Tournament.objects.get(title='Tournoi test')
+        self.assertRaises(ValidationError,
+                          TournamentProduct.utilities.create_tournament_product,
+                          tournament=tourney,
+                          price=15,
+                          stock=65
+                          )
+        tourney_product = \
+            TournamentProduct.objects.get(price=10.50)
+        self.assertRaises(ValidationError,
+                          TournamentProduct.utilities.update_tournament_product,
+                          product_id=tourney_product.pk,
+                          stock=65
+                          )
 
     def test_update_tournament_product(self):
         tourney_product = \
             TournamentProduct.objects.get(price=10.50)
-        TournamentProduct.utilities.updateTournamentProduct(
+        TournamentProduct.utilities.update_tournament_product(
             product_id=tourney_product.pk,
             price=12
             )
@@ -56,7 +73,7 @@ class TournamentProductTestCase(TestCase):
         tourney_product = \
             TournamentProduct.objects.get(price=10.50)
         self.assertIsInstance(tourney_product, TournamentProduct)
-        TournamentProduct.utilities.deleteTournamentProduct(tourney_product.pk)
+        TournamentProduct.utilities.delete_tournament_product(tourney_product.pk)
         self.assertRaises(ObjectDoesNotExist,
                           TournamentProduct.objects.get,
                           price=10.50)

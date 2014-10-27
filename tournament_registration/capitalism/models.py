@@ -1,9 +1,10 @@
 from satchless.item import InsufficientStock, StockedItem
 from datetime import date
-from django.utils import timezone
 
+from django.utils import timezone
 from django.db import models
 from django_prices.models import PriceField
+from django.core.exceptions import ValidationError
 
 from registration.models import Tournament
 
@@ -15,24 +16,31 @@ class Product(models.Model, StockedItem):
                        decimal_places=2,
                        blank=False,
                        default=0.0)
+    stock = models.PositiveSmallIntegerField('Product Stock',
+                                             blank=False,
+                                             default=0)
     date_added = models.DateField('Date added')
     last_modified = models.DateTimeField('Last modified')
+
+    def get_price_per_item(self):
+        return price
 
     class Meta:
         abstract = True
 
 
 class TournamentProductUtilitiesManager(models.Manager):
-    def createTournamentProduct(self, tournament, price=0.0):
+    def create_tournament_product(self, tournament, price=0.0, stock=0):
         tourney_product = TournamentProduct(tournament=tournament,
                                             price=price,
+                                            stock=stock,
                                             date_added=date.today(),
                                             last_modified=timezone.now())
         tourney_product.save()
         return tourney_product
 
-    def updateTournamentProduct(self, product_id, **kwargs):
-        additional_attributes = {'price'}
+    def update_tournament_product(self, product_id, **kwargs):
+        additional_attributes = {'price', 'stock'}
         tourney_product = TournamentProduct.objects.get(pk=product_id)
         for attribute, value in kwargs.items():
             assert attribute in additional_attributes
@@ -40,7 +48,7 @@ class TournamentProductUtilitiesManager(models.Manager):
         tourney_product.save()
         return tourney_product
 
-    def deleteTournamentProduct(self, product_id):
+    def delete_tournament_product(self, product_id):
         tourney_product = TournamentProduct.objects.get(pk=product_id)
         tourney_product.delete()
 
@@ -49,3 +57,14 @@ class TournamentProduct(Product):
     tournament = models.OneToOneField(Tournament)
     objects = models.Manager()
     utilities = TournamentProductUtilitiesManager()
+
+    def get_stock(self):
+        return stock
+
+    def save(self, *args, **kwargs):
+        " Override the save method to check the stock "
+        if self.stock > self.tournament.get_available_spots():
+            msg = 'Stock of a TournamentProduct cannot be greater than the \
+                tournament available spots'
+            raise ValidationError(msg)
+        super(TournamentProduct, self).save(*args, **kwargs)

@@ -237,12 +237,6 @@ class PlayerDeleteTestCase(TestCase):
 
     def test_delete_existing_player(self):
         player = Player.utilities.create_player(name='MAO')
-        tourney = Tournament.utilities.create_tournament(
-            title='Tougekiche',
-            game='2X',
-            date=date.today(),
-            nb_max=64
-        )
         response = self.client.get(reverse('delete_player',
                                            kwargs={'slug':player.slug}))
         # Checking the data is correct

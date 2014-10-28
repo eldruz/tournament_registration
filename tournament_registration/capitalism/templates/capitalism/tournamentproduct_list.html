@@ -1,0 +1,8 @@
+<h2>Tournament Products</h2>
+    <ul>
+    {% for tournament in tournament_list %}
+        <li>{{ tournament.tournament.title }} - ID:{{ tournament.price }}</li>
+    {% empty %}
+        <li>No tournaments are available</li>
+    {% endfor %}
+    </ul>

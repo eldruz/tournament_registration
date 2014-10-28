@@ -1,6 +1,8 @@
 from satchless.item import InsufficientStock, StockedItem
 from datetime import date
 
+from django.utils.text import slugify
+from django.core.urlresolvers import reverse
 from django.utils import timezone
 from django.db import models
 from django_prices.models import PriceField
@@ -21,6 +23,7 @@ class Product(models.Model, StockedItem):
                                              default=0)
     date_added = models.DateField('Date added')
     last_modified = models.DateTimeField('Last modified')
+    slug = models.SlugField('Product slug', max_length=256)
 
     def get_price_per_item(self):
         return price
@@ -62,9 +65,14 @@ class TournamentProduct(Product):
         return self.stock
 
     def save(self, *args, **kwargs):
-        " Override the save method to check the stock "
+        " Override the save method to check the stock and set the slug "
         if self.stock > self.tournament.get_available_spots():
             msg = 'Stock of a TournamentProduct cannot be greater than the \
                 tournament available spots'
             raise ValidationError(msg)
+        self.slug = slugify(
+            unicode(self.tournament.date.isoformat() + '-' + self.tournament.title))
         super(TournamentProduct, self).save(*args, **kwargs)
+
+    def get_absolute_url(self):
+        return reverse('tournamentproduct_detail', kwargs={'slug': self.slug})

@@ -76,3 +76,6 @@ class TournamentProduct(Product):
 
     def get_absolute_url(self):
         return reverse('tournamentproduct_detail', kwargs={'slug': self.slug})
+
+    def __unicode__(self):
+        return self.tournament.title

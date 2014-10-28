@@ -38,7 +38,9 @@ class TournamentProductTestCase(TestCase):
                           price=5.25)
 
     def test_tournament_product_too_much_stock(self):
+        """A tournament product cannot have more stock than available spots"""
         tourney = Tournament.objects.get(title='Tournoi test')
+        # Test on creation of a new tournament product
         self.assertRaises(ValidationError,
                           TournamentProduct.utilities.create_tournament_product,
                           tournament=tourney,
@@ -47,6 +49,7 @@ class TournamentProductTestCase(TestCase):
                           )
         tourney_product = \
             TournamentProduct.objects.get(price=10.50)
+        # Test on updating an existing tournament product
         self.assertRaises(ValidationError,
                           TournamentProduct.utilities.update_tournament_product,
                           product_id=tourney_product.pk,

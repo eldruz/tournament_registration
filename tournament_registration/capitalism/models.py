@@ -43,7 +43,7 @@ class TournamentProductUtilitiesManager(models.Manager):
         return tourney_product
 
     def update_tournament_product(self, product_id, **kwargs):
-        additional_attributes = {'price', 'stock'}
+        additional_attributes = {'price', 'stock', 'tournament'}
         tourney_product = TournamentProduct.objects.get(pk=product_id)
         for attribute, value in kwargs.items():
             assert attribute in additional_attributes
@@ -70,12 +70,11 @@ class TournamentProduct(Product):
             msg = 'Stock of a TournamentProduct cannot be greater than the \
                 tournament available spots'
             raise ValidationError(msg)
-        self.slug = slugify(
-            unicode(self.tournament.date.isoformat() + '-' + self.tournament.title))
+        self.slug = slugify(unicode(self.tournament.slug))
         super(TournamentProduct, self).save(*args, **kwargs)
 
     def get_absolute_url(self):
-        return reverse('tournamentproduct_detail', kwargs={'slug': self.slug})
+        return reverse('tournament_product_detail', kwargs={'slug': self.slug})
 
     def __unicode__(self):
         return self.tournament.title

@@ -2,9 +2,13 @@ from django.conf.urls import patterns, url
 
 from .views import TournamentProductListView, TournamentProductCreateView, \
     TournamentProductDetailView, TournamentProductDeleteView, \
-    TournamentProductUpdateView
+    TournamentProductUpdateView, CartContentsView, CartAddItemView
 
 urlpatterns = patterns('',
+    url(r'^cart/view/$',
+        CartContentsView.as_view(), name='cart_contents'),
+    url(r'^cart/add/$',
+        CartAddItemView.as_view(), name='cart_add'),
     url(r'^tproduct/list/$',
         TournamentProductListView.as_view(), name='tournament_product_list'),
     url(r'^tproduct/create/$',

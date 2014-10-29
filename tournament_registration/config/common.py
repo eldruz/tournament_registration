@@ -131,6 +131,11 @@ class Common(Configuration):
     }
     # END CACHING
 
+    # SESSION
+    # Use a cached persistent session
+    SESSION_ENGINE = 'django.contrib.sessions.backends.cached_db'
+    # END SESSION CONFIGURATION
+
     # GENERAL CONFIGURATION
     # See: https://docs.djangoproject.com/en/dev/ref/settings/#time-zone
     TIME_ZONE = 'Europe/Paris'

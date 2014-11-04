@@ -1,1 +1,0 @@
-web: gunicorn --pythonpath="$PWD/tournament_registration" wsgi:application

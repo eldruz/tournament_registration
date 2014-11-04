@@ -1,4 +1,4 @@
-TOURNAMENT REGISTRATION
+Tournament Registration
 ==============================
 
 Disclaimer
@@ -8,7 +8,7 @@ This is very much a work in progress, and until this particular statement disapp
 
 What is this about?
 -------------------
-This is an attempt to create a full registration application aimed for fighting games tournaments. 
+This is an attempt to create a full registration application aimed for fighting games tournaments created in with `Django <https://www.djangoproject.com/>`_.
 
 Planned features are :
 

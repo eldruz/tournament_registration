@@ -11,6 +11,7 @@ What is this about?
 This is an attempt to create a full registration application aimed for fighting games tournaments. 
 
 Planned features are :
+
 * Manual registration of players into tournaments
 * Online registration via an online shop
 * Automatic synchronisation between manual and online applicants
